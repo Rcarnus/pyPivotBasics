@@ -22,7 +22,7 @@ else:
     host = sys.argv[1]
 
 if len(sys.argv) > 2:
-    intensity = sys.arv[2]
+    intensity = sys.arvg[2]
 
 if intensity == "--full":
     myrange = fullrange
